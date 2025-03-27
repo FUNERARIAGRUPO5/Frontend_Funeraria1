@@ -1,0 +1,49 @@
+// Importaciones necesarias para el componente visual
+import React from 'react';
+import { Table } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+// Declaración del componente TablaClientes que recibe props
+const TablaBeneficiarios = ({ Beneficiarios, cargando, error }) => {
+  // Renderizado condicional según el estado recibido por props
+  if (cargando) {
+    return <div>Cargando clientes...</div>; // Muestra mensaje mientras carga
+  }
+  if (error) {
+    return <div>Error: {error}</div>;         // Muestra error si ocurre
+  }
+
+  // Renderizado de la tabla con los datos recibidos
+  return (
+    <Table striped bordered hover responsive>
+      <thead>
+        <tr>
+          <th>IDcliente</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Cedula</th>
+          <th>Telefono</th>
+          <th>IDContratos</th>
+
+        </tr>
+      </thead>
+      <tbody>
+        {Beneficiarios.map((Beneficiarios) => (
+          <tr key={Beneficiarios.IDBeneficiarios}>
+             <td>{Beneficiarios.IDBeneficiarios}</td>
+            <td>{Beneficiarios.Nombre}</td>
+            <td>{Beneficiarios.Apellido}</td>
+            <td>{Beneficiarios.Cedula}</td>
+            <td>{Beneficiarios.Telefono}</td>
+            <td>{Beneficiarios.IDContratos}</td>
+          
+            
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+};
+
+// Exportación del componente
+export default TablaBeneficiarios;
