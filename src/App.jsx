@@ -7,6 +7,9 @@ import Encabezado from "./components/login/encabezado/Encabezado";// Barra de na
 import Beneficiarios from "./views/Beneficiarios";
 import Agentes from "./views/Agentes";
 import Contrato from "./views/Contrato.jsx";
+import Modelo from "./views/Modelos.jsx";
+import Facturas from "./views/Facturas.jsx";
+import Servicios from "./views/Servicios.jsx";
 import './App.css'; 
 
 
@@ -24,6 +27,9 @@ const App = () => {
             <Route path="/Beneficiarios" element={<Beneficiarios/>} />
             <Route path="/Agentes" element={<Agentes/>} />
             <Route path="/Contrato" element={<Contrato/>} />
+            <Route path="/Modelos" element={<Modelo/>} />
+            <Route path="/Facturas" element={<Facturas/>} />
+            <Route path="/Servicios" element={<Servicios/>} />
 
           </Routes>
       </main>

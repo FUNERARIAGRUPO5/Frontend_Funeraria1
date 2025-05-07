@@ -17,7 +17,7 @@ const Login = () => {
     
 
     try {
-      const respuesta = await fetch("http://localhost:3001/api/verificar", {
+      const respuesta = await fetch("http://localhost:3007/api/verificar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
