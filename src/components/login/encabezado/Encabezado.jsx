@@ -46,7 +46,12 @@ const Encabezado = () => {
           className="text-white"
           style={{ cursor: "pointer" }}
         >
-          <img alt="" src={logo} width="30" height="30" className="d-inline-block align-top" />{" "}
+          <img
+            alt="Funeraria Heraldica"
+            src="/FunerariaHeraldica.png"
+            style={{ height: "50px", width: "auto", marginRight: "10px" }}
+            className="d-inline-block align-top"
+          />
           <strong>Funeraria Heraldica</strong>
         </Navbar.Brand>
 
