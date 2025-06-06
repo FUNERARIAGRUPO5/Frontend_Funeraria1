@@ -81,6 +81,23 @@ const ModalAgregarServicio = ({
               required
               aria-label="ID del contrato"
             />
+            <Form.Control
+            type="file"
+            name="imagen"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  manejarCambioInput({
+                    target: { name: 'imagen', value: reader.result.split(',')[1] } // Extrae solo la parte Base64
+                  });
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+          />
           </Form.Group>
           {errorCarga && (
             <div className="text-danger mt-2">{errorCarga}</div>

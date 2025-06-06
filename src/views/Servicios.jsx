@@ -5,6 +5,10 @@ import TablaServicio from '../components/servicios/TablaServicios';
 import CuadroBusquedas from '../components/busquedas/CuadroBusquedas';
 import ModalEdicionServicio from '../components/servicios/ModalEdicionServicios';
 import ModalEliminacionServicio from '../components/servicios/ModalEliminarServicios';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const Servicios = () => {
   const [listaServicios, setListaServicios] = useState([]);
@@ -193,6 +197,114 @@ const Servicios = () => {
     }
   };
 
+  const generarPDFServicios = () => {
+    const doc = new jsPDF();
+
+    // Encabezado del PDF
+    doc.setFillColor(28, 41, 51);
+    doc.rect(0, 0, 220, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.text("Lista de Servicios", doc.internal.pageSize.getWidth() / 2, 18, { align: "center" });
+
+    const columnas = ["ID", "Nombre", "Código de Modelo", "Monto", "ID Modelo", "ID Contrato"];
+    const filas = serviciosFiltrados.map((servicio) => [
+      servicio.ID_Servicio ?? servicio.IDServicio_At,
+      servicio.Nombre,
+      servicio.Codigo_de_Modelo,
+      servicio.monto,
+      servicio.IDModelo,
+      servicio.ID_Contrato
+    ]);
+
+    const totalPaginas = "{total_pages_count_string}";
+
+    autoTable(doc, {
+      head: [columnas],
+      body: filas,
+      startY: 40,
+      theme: "grid",
+      styles: { fontSize: 10, cellPadding: 2 },
+      margin: { top: 20, left: 14, right: 14 },
+      tableWidth: "auto",
+      columnStyles: { cellWidth: 'auto' },
+      pageBreak: "auto",
+      rowPageBreak: "auto",
+      didDrawPage: function (data) {
+        const alturaPagina = doc.internal.pageSize.getHeight();
+        const anchoPagina = doc.internal.pageSize.getWidth();
+        const numeroPagina = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        const piePagina = `Página ${numeroPagina} de ${totalPaginas}`;
+        doc.text(piePagina, anchoPagina / 2 + 15, alturaPagina - 10, { align: "center" });
+      },
+    });
+
+    if (typeof doc.putTotalPages === 'function') {
+      doc.putTotalPages(totalPaginas);
+    }
+
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    const nombreArchivo = `servicios_${dia}${mes}${anio}.pdf`;
+    doc.save(nombreArchivo);
+  };
+
+  const generarPDFDetalleServicio = (servicio) => {
+    const pdf = new jsPDF();
+    const anchoPagina = pdf.internal.pageSize.getWidth();
+    const idServicio = servicio.ID_Servicio ?? servicio.IDServicio_At;
+
+    // Encabezado
+    pdf.setFillColor(28, 41, 51);
+    pdf.rect(0, 0, 220, 30, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(22);
+    pdf.text(`Servicio ${idServicio}`, anchoPagina / 2, 18, { align: "center" });
+
+    let posicionY = 50;
+
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+
+    pdf.text(`Nombre: ${servicio.Nombre}`, anchoPagina / 2, posicionY, { align: "center" });
+    pdf.text(`Código de Modelo: ${servicio.Codigo_de_Modelo}`, anchoPagina / 2, posicionY + 10, { align: "center" });
+    pdf.text(`Monto: C$ ${servicio.monto}`, anchoPagina / 2, posicionY + 20, { align: "center" });
+    pdf.text(`ID Modelo: ${servicio.IDModelo}`, anchoPagina / 2, posicionY + 30, { align: "center" });
+    pdf.text(`ID Contrato: ${servicio.ID_Contrato}`, anchoPagina / 2, posicionY + 40, { align: "center" });
+
+    pdf.save(`servicio_${idServicio}.pdf`);
+  };
+
+  const exportarExcelServicios = () => {
+    const datos = serviciosFiltrados.map((servicio) => ({
+      ID: servicio.ID_Servicio ?? servicio.IDServicio_At,
+      Nombre: servicio.Nombre,
+      "Código de Modelo": servicio.Codigo_de_Modelo,
+      Monto: parseFloat(servicio.monto),
+      "ID Modelo": servicio.IDModelo,
+      "ID Contrato": servicio.ID_Contrato
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Servicios");
+
+    const excelBuffer = XLSX.write(libro, { bookType: 'xlsx', type: 'array' });
+
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    const nombreArchivo = `servicios_${dia}${mes}${anio}.xlsx`;
+
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, nombreArchivo);
+  };
+
   const serviciosPaginados = serviciosFiltrados.slice(
     (paginaActual - 1) * elementosPorPagina,
     paginaActual * elementosPorPagina
@@ -213,6 +325,26 @@ const Servicios = () => {
             manejarCambioBusqueda={manejarCambioBusqueda}
           />
         </Col>
+        <Col lg={3} md={4} sm={3}>
+          <Button
+            className="mb-3"
+            onClick={() => generarPDFServicios()}
+            variant="secondary"
+            style={{ width: "100%" }}
+          >
+            Generar reporte PDF
+          </Button>
+        </Col>
+        <Col lg={2} md={4} sm={3}>
+          <Button
+            className="mb-3"
+            onClick={() => exportarExcelServicios()}
+            variant="secondary"
+            style={{ width: "100%" }}
+          >
+            Generar Excel
+          </Button>
+        </Col>
       </Row>
       <TablaServicio
         Servicios={serviciosPaginados}
@@ -224,6 +356,7 @@ const Servicios = () => {
         establecerPaginaActual={establecerPaginaActual}
         abrirModalEliminacion={abrirModalEliminacion}
         abrirModalEdicion={abrirModalEdicion}
+        generarPDFDetalleServicio={generarPDFDetalleServicio}
       />
       <ModalRegistroServicio
         mostrarModal={mostrarModal}

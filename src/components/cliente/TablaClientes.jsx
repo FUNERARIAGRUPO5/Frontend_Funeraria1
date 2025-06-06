@@ -3,27 +3,28 @@ import { Table, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Paginacion from '../ordenamiento/Paginacion';
 
-// Declaración del componente TablaClientes que recibe props
 const TablaClientes = ({ 
-  clientes, 
+  clientes = [], 
   cargando, 
   error, 
   totalElementos, 
   elementosPorPagina, 
   paginaActual, 
   establecerPaginaActual,
+  generarPDFDetalleCliente,
   abrirModalEliminacion,
   abrirModalEdicion 
 }) => {
-  // Renderizado condicional según el estado recibido por props
   if (cargando) {
-    return <div>Cargando clientes...</div>; // Muestra mensaje mientras carga
+    return <div>Cargando clientes...</div>;
   }
   if (error) {
-    return <div>Error: {error}</div>; // Muestra error si ocurre
+    return <div>Error: {error}</div>;
+  }
+  if (!Array.isArray(clientes) || clientes.length === 0) {
+    return <div>No hay clientes disponibles</div>;
   }
 
-  // Renderizado de la tabla con los datos recibidos
   return (
     <>
       <Table striped bordered hover responsive>
@@ -49,10 +50,20 @@ const TablaClientes = ({
               <td>{cliente.Telefono}</td>
               <td>
                 <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  className="me-2"
+                  onClick={() => generarPDFDetalleCliente(cliente)}
+                  aria-label={`Generar PDF para cliente ${cliente.Nombre}`}
+                >
+                  <i className="bi bi-filetype-pdf"></i>
+                </Button>
+                <Button
                   variant="outline-danger"
                   size="sm"
                   className="me-2"
                   onClick={() => abrirModalEliminacion(cliente)}
+                  aria-label={`Eliminar cliente ${cliente.Nombre}`}
                 >
                   <i className="bi bi-trash"></i>
                 </Button>
@@ -60,6 +71,7 @@ const TablaClientes = ({
                   variant="outline-warning"
                   size="sm"
                   onClick={() => abrirModalEdicion(cliente)}
+                  aria-label={`Editar cliente ${cliente.Nombre}`}
                 >
                   <i className="bi bi-pencil"></i>
                 </Button>
@@ -78,5 +90,4 @@ const TablaClientes = ({
   );
 };
 
-// Exportación del componente
 export default TablaClientes;

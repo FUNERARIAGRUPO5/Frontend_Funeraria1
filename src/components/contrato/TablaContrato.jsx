@@ -3,17 +3,25 @@ import { Table, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Paginacion from '../ordenamiento/Paginacion';
 
-// Declaración del componente TablaContrato que recibe props
-const TablaContrato = ({ contratos, cargando, error, totalElementos, elementosPorPagina, paginaActual, establecerPaginaActual, abrirModalEliminacion, abrirModalEdicion }) => {
-  // Renderizado condicional según el estado recibido por props
+const TablaContrato = ({
+  contratos,
+  cargando,
+  error,
+  totalElementos,
+  elementosPorPagina,
+  paginaActual,
+  establecerPaginaActual,
+  generarPDFDetalleContrato,
+  abrirModalEliminacion,
+  abrirModalEdicion
+}) => {
   if (cargando) {
-    return <div>Cargando los contratos...</div>; // Muestra mensaje mientras carga
+    return <div>Cargando los contratos...</div>;
   }
   if (error) {
-    return <div>Error: {error}</div>; // Muestra error si ocurre
+    return <div>Error: {error}</div>;
   }
 
-  // Renderizado de la tabla con los datos recibidos
   return (
     <>
       <Table striped bordered hover responsive>
@@ -45,6 +53,14 @@ const TablaContrato = ({ contratos, cargando, error, totalElementos, elementosPo
               <td>{contrato.NombreCliente}</td>
               <td>
                 <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  className="me-2"
+                  onClick={() => generarPDFDetalleContrato(contrato)}
+                >
+                  <i className="bi bi-filetype-pdf"></i>
+                </Button>
+                <Button
                   variant="outline-danger"
                   size="sm"
                   className="me-2"
@@ -74,5 +90,4 @@ const TablaContrato = ({ contratos, cargando, error, totalElementos, elementosPo
   );
 };
 
-// Exportación del componente
 export default TablaContrato;

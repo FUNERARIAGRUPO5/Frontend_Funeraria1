@@ -5,6 +5,10 @@ import ModalEdicionContrato from '../components/contrato/ModalEdicionContrato';
 import ModalEliminacionContrato from '../components/contrato/ModalEliminacionContrato';
 import CuadroBusquedas from '../components/busquedas/CuadroBusquedas';
 import { Container, Button, Row, Col } from "react-bootstrap";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const Contrato = () => {
   const [listaContratos, setListaContratos] = useState([]);
@@ -13,12 +17,12 @@ const Contrato = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevoContrato, setNuevoContrato] = useState({
     Estado: '',
-    Cantidad_Beneficiarios: '',
+    CantidadBeneficiarios: '',
     Cuotas: '',
     Monto: '',
     Fecha_inicio: '',
     Fecha_fin: '',
-    IDcliente: ''
+    IDCliente: ''
   });
   const [contratosFiltrados, setContratosFiltrados] = useState([]);
   const [textoBusqueda, setTextoBusqueda] = useState("");
@@ -71,12 +75,12 @@ const Contrato = () => {
   const agregarContrato = async () => {
     if (
       !nuevoContrato.Estado ||
-      !nuevoContrato.Cantidad_Beneficiarios ||
+      !nuevoContrato.CantidadBeneficiarios ||
       !nuevoContrato.Cuotas ||
       !nuevoContrato.Monto ||
       !nuevoContrato.Fecha_inicio ||
       !nuevoContrato.Fecha_fin ||
-      !nuevoContrato.IDcliente
+      !nuevoContrato.IDCliente
     ) {
       setErrorCarga('Por favor, completa todos los campos antes de guardar.');
       return;
@@ -98,12 +102,12 @@ const Contrato = () => {
       await obtenerContratos();
       setNuevoContrato({
         Estado: '',
-        Cantidad_Beneficiarios: '',
+        CantidadBeneficiarios: '',
         Cuotas: '',
         Monto: '',
         Fecha_inicio: '',
         Fecha_fin: '',
-        IDcliente: ''
+        IDCliente: ''
       });
       setMostrarModal(false);
       establecerPaginaActual(1);
@@ -138,12 +142,12 @@ const Contrato = () => {
   const actualizarContrato = async () => {
     if (
       !contratoEditado?.Estado ||
-      !contratoEditado?.Cantidad_Beneficiarios ||
+      !contratoEditado?.CantidadBeneficiarios ||
       !contratoEditado?.Cuotas ||
       !contratoEditado?.Monto ||
       !contratoEditado?.Fecha_inicio ||
       !contratoEditado?.Fecha_fin ||
-      !contratoEditado?.IDcliente
+      !contratoEditado?.IDCliente
     ) {
       setErrorCarga("Por favor, completa todos los campos antes de guardar.");
       return;
@@ -157,12 +161,12 @@ const Contrato = () => {
         },
         body: JSON.stringify({
           Estado: contratoEditado.Estado,
-          Cantidad_Beneficiarios: contratoEditado.Cantidad_Beneficiarios,
+          CantidadBeneficiarios: contratoEditado.CantidadBeneficiarios,
           Cuotas: contratoEditado.Cuotas,
           Monto: contratoEditado.Monto,
           Fecha_inicio: contratoEditado.Fecha_inicio,
           Fecha_fin: contratoEditado.Fecha_fin,
-          IDcliente: contratoEditado.IDcliente
+          IDCliente: contratoEditado.IDCliente
         }),
       });
 
@@ -207,17 +211,130 @@ const Contrato = () => {
       const filtrados = listaContratos.filter(
         (contrato) =>
           (contrato.Estado && contrato.Estado.toLowerCase().includes(texto)) ||
-          (contrato.Cantidad_Beneficiarios && String(contrato.Cantidad_Beneficiarios).toLowerCase().includes(texto)) ||
+          (contrato.CantidadBeneficiarios && String(contrato.CantidadBeneficiarios).toLowerCase().includes(texto)) ||
           (contrato.Cuotas && String(contrato.Cuotas).toLowerCase().includes(texto)) ||
           (contrato.Monto && String(contrato.Monto).toLowerCase().includes(texto)) ||
           (contrato.Fecha_inicio && contrato.Fecha_inicio.toLowerCase().includes(texto)) ||
           (contrato.Fecha_fin && contrato.Fecha_fin.toLowerCase().includes(texto)) ||
-          (contrato.IDcliente && String(contrato.IDcliente).toLowerCase().includes(texto))
+          (contrato.IDCliente && String(contrato.IDCliente).toLowerCase().includes(texto))
       );
       console.log("Contratos filtrados:", filtrados);
       setContratosFiltrados(filtrados);
       establecerPaginaActual(1);
     }
+  };
+
+  const generarPDFContratos = () => {
+    const doc = new jsPDF();
+
+    // Encabezado del PDF
+    doc.setFillColor(28, 41, 51);
+    doc.rect(0, 0, 220, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.text("Lista de Contratos", doc.internal.pageSize.getWidth() / 2, 18, { align: "center" });
+
+    const columnas = ["ID", "Estado", "Beneficiarios", "Cuotas", "Monto", "Fecha Inicio", "Fecha Fin", "ID Cliente"];
+    const filas = contratosFiltrados.map((contrato) => [
+      contrato.IDContrato,
+      contrato.Estado,
+      contrato.CantidadBeneficiarios,
+      contrato.Cuotas,
+      contrato.Monto,
+      contrato.Fecha_inicio,
+      contrato.Fecha_fin,
+      contrato.IDCliente
+    ]);
+
+    const totalPaginas = "{total_pages_count_string}";
+
+    autoTable(doc, {
+      head: [columnas],
+      body: filas,
+      startY: 40,
+      theme: "grid",
+      styles: { fontSize: 10, cellPadding: 2 },
+      margin: { top: 20, left: 14, right: 14 },
+      tableWidth: "auto",
+      columnStyles: { cellWidth: 'auto' },
+      pageBreak: "auto",
+      rowPageBreak: "auto",
+      didDrawPage: function (data) {
+        const alturaPagina = doc.internal.pageSize.getHeight();
+        const anchoPagina = doc.internal.pageSize.getWidth();
+        const numeroPagina = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        const piePagina = `Página ${numeroPagina} de ${totalPaginas}`;
+        doc.text(piePagina, anchoPagina / 2 + 15, alturaPagina - 10, { align: "center" });
+      },
+    });
+
+    if (typeof doc.putTotalPages === 'function') {
+      doc.putTotalPages(totalPaginas);
+    }
+
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    const nombreArchivo = `contratos_${dia}${mes}${anio}.pdf`;
+    doc.save(nombreArchivo);
+  };
+
+  const generarPDFDetalleContrato = (contrato) => {
+    const pdf = new jsPDF();
+    const anchoPagina = pdf.internal.pageSize.getWidth();
+
+    // Encabezado
+    pdf.setFillColor(28, 41, 51);
+    pdf.rect(0, 0, 220, 30, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(22);
+    pdf.text(`Contrato ${contrato.IDContrato}`, anchoPagina / 2, 18, { align: "center" });
+
+    let posicionY = 50;
+
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+
+    pdf.text(`Estado: ${contrato.Estado}`, anchoPagina / 2, posicionY, { align: "center" });
+    pdf.text(`Beneficiarios: ${contrato.CantidadBeneficiarios}`, anchoPagina / 2, posicionY + 10, { align: "center" });
+    pdf.text(`Cuotas: ${contrato.Cuotas}`, anchoPagina / 2, posicionY + 20, { align: "center" });
+    pdf.text(`Monto: C$ ${contrato.Monto}`, anchoPagina / 2, posicionY + 30, { align: "center" });
+    pdf.text(`Fecha Inicio: ${contrato.Fecha_inicio}`, anchoPagina / 2, posicionY + 40, { align: "center" });
+    pdf.text(`Fecha Fin: ${contrato.Fecha_fin}`, anchoPagina / 2, posicionY + 50, { align: "center" });
+    pdf.text(`ID Cliente: ${contrato.IDCliente}`, anchoPagina / 2, posicionY + 60, { align: "center" });
+
+    pdf.save(`contrato_${contrato.IDContrato}.pdf`);
+  };
+
+  const exportarExcelContratos = () => {
+    const datos = contratosFiltrados.map((contrato) => ({
+      ID: contrato.IDContrato,
+      Estado: contrato.Estado,
+      Beneficiarios: contrato.CantidadBeneficiarios,
+      Cuotas: contrato.Cuotas,
+      Monto: parseFloat(contrato.Monto),
+      "Fecha Inicio": contrato.Fecha_inicio,
+      "Fecha Fin": contrato.Fecha_fin,
+      "ID Cliente": contrato.IDCliente
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Contratos");
+
+    const excelBuffer = XLSX.write(libro, { bookType: 'xlsx', type: 'array' });
+
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    const nombreArchivo = `contratos_${dia}${mes}${anio}.xlsx`;
+
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, nombreArchivo);
   };
 
   const contratosPaginados = contratosFiltrados.slice(
@@ -240,6 +357,26 @@ const Contrato = () => {
             manejarCambioBusqueda={manejarCambioBusqueda}
           />
         </Col>
+        <Col lg={3} md={4} sm={3}>
+          <Button
+            className="mb-3"
+            onClick={() => generarPDFContratos()}
+            variant="secondary"
+            style={{ width: "100%" }}
+          >
+            Generar reporte PDF
+          </Button>
+        </Col>
+        <Col lg={2} md={4} sm={3}>
+          <Button
+            className="mb-3"
+            onClick={() => exportarExcelContratos()}
+            variant="secondary"
+            style={{ width: "100%" }}
+          >
+            Generar Excel
+          </Button>
+        </Col>
       </Row>
 
       <TablaContrato
@@ -252,6 +389,7 @@ const Contrato = () => {
         establecerPaginaActual={establecerPaginaActual}
         abrirModalEliminacion={abrirModalEliminacion}
         abrirModalEdicion={abrirModalEdicion}
+        generarPDFDetalleContrato={generarPDFDetalleContrato}
       />
 
       <ModalRegistroContrato

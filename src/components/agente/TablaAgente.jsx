@@ -3,7 +3,6 @@ import { Table, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Paginacion from '../ordenamiento/Paginacion';
 
-// Declaración del componente TablaAgente que recibe props
 const TablaAgente = ({ 
   agentes, 
   cargando, 
@@ -12,23 +11,20 @@ const TablaAgente = ({
   elementosPorPagina, 
   paginaActual, 
   establecerPaginaActual,
+  generarPDFDetalleAgente,
   abrirModalEliminacion,
   abrirModalEdicion 
 }) => {
-  // Renderizado condicional según el estado recibido por props
   if (cargando) {
-    return <div>Cargando Agentes...</div>; // Muestra mensaje mientras carga
+    return <div>Cargando Agentes...</div>;
   }
   if (error) {
-    return <div>Error: {error}</div>; // Muestra error si ocurre
+    return <div>Error: {error}</div>;
   }
-
-  // Verifica si agentes es un arreglo antes de usar map
   if (!Array.isArray(agentes) || agentes.length === 0) {
-    return <div>No hay agentes para mostrar</div>; // Mensaje si no hay datos
+    return <div>No hay agentes para mostrar</div>;
   }
 
-  // Renderizado de la tabla con los datos recibidos
   return (
     <>
       <Table striped bordered hover responsive>
@@ -47,6 +43,14 @@ const TablaAgente = ({
               <td>{agente.Nombre}</td>
               <td>{agente.Telefono}</td>
               <td>
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  className="me-2"
+                  onClick={() => generarPDFDetalleAgente(agente)}
+                >
+                  <i className="bi bi-filetype-pdf"></i>
+                </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"
@@ -77,5 +81,4 @@ const TablaAgente = ({
   );
 };
 
-// Exportación del componente
 export default TablaAgente;

@@ -4,13 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Paginacion from '../ordenamiento/Paginacion';
 
 const TablaServicios = ({ 
-  Servicios, 
+  Servicios = [], 
   cargando, 
   error, 
   totalElementos, 
   elementosPorPagina, 
   paginaActual, 
   establecerPaginaActual,
+  generarPDFDetalleServicio,
   abrirModalEliminacion,
   abrirModalEdicion 
 }) => {
@@ -19,6 +20,9 @@ const TablaServicios = ({
   }
   if (error) {
     return <div>Error: {error}</div>;
+  }
+  if (!Array.isArray(Servicios) || Servicios.length === 0) {
+    return <div>No hay servicios disponibles</div>;
   }
 
   return (
@@ -41,15 +45,25 @@ const TablaServicios = ({
               <td>{servicio.IDServicio_At}</td>
               <td>{servicio.Nombre}</td>
               <td>{servicio.Codigo_de_Modelo}</td>
-              <td>{servicio.monto}</td>
+              <td>C$ {servicio.monto.toFixed(2)}</td>
               <td>{servicio.IDModelo}</td>
               <td>{servicio.ID_Contrato}</td>
               <td>
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  className="me-2"
+                  onClick={() => generarPDFDetalleServicio(servicio)}
+                  aria-label={`Generar PDF para servicio ${servicio.Nombre}`}
+                >
+                  <i className="bi bi-filetype-pdf"></i>
+                </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"
                   className="me-2"
                   onClick={() => abrirModalEliminacion(servicio)}
+                  aria-label={`Eliminar servicio ${servicio.Nombre}`}
                 >
                   <i className="bi bi-trash"></i>
                 </Button>
@@ -57,6 +71,7 @@ const TablaServicios = ({
                   variant="outline-warning"
                   size="sm"
                   onClick={() => abrirModalEdicion(servicio)}
+                  aria-label={`Editar servicio ${servicio.Nombre}`}
                 >
                   <i className="bi bi-pencil"></i>
                 </Button>

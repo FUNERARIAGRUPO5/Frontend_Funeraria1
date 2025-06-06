@@ -11,6 +11,7 @@ const TablaModelo = ({
   elementosPorPagina, 
   paginaActual, 
   establecerPaginaActual,
+  generarPDFDetalleModelo,
   abrirModalEliminacion,
   abrirModalEdicion 
 }) => {
@@ -31,6 +32,7 @@ const TablaModelo = ({
             <th>Modelo</th>
             <th>Medida</th>
             <th>Color</th>
+            <th>Imagen</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -43,6 +45,25 @@ const TablaModelo = ({
               <td>{modelo.Medida}</td>
               <td>{modelo.Color}</td>
               <td>
+                {modelo.imagen ? (
+                  <img
+                    src={`data:image/png;base64,${modelo.imagen}`}
+                    alt={modelo.Nombre}
+                    style={{ maxWidth: '100px' }}
+                  />
+                ) : (
+                  'Sin imagen'
+                )}
+              </td>
+              <td>
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  className="me-2"
+                  onClick={() => generarPDFDetalleModelo(modelo)}
+                >
+                  <i className="bi bi-filetype-pdf"></i>
+                </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"
