@@ -1,12 +1,49 @@
+/* Estilos de la barra de navegación */
 .color-navbar {
   background-color: #666560 !important;
   background-image: linear-gradient(257deg, #7e7e7e 0%, #292726 100%);
 }
 
+/* Color del texto de la marca */
 .color-texto-marca {
   color: #1e3d87 !important;
 }
 
-.margen-superior-main{
-  margin-top: 60px;
+/* Fondo de atardecer con gradiente */
+body {
+  background: linear-gradient(135deg, #5b59e6 0%, #daccbf 50%, #0f2149 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  color: #e0e0e0; /* Texto claro para legibilidad */
+}
+
+/* Contenedor principal */
+.main {
+  margin-top: 60px; /* Coherente con .margen-superior-main */
+  min-height: calc(100vh - 60px);
+  position: relative;
+  z-index: 2;
+}
+
+/* Contenedor de contenido */
+.container {
+  background: rgba(28, 37, 38, 0.95); /* Fondo oscuro semitransparente */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: #e0e0e0; /* Texto claro */
+}
+
+/* Ajustes para componentes de Bootstrap */
+.btn-primary {
+  background-color: #1e3d87 !important; /* Coherente con la marca */
+  border-color: #1e3d87 !important;
+}
+
+.btn-primary:hover {
+  background-color: #162d6d !important; /* Tono más oscuro al pasar el ratón */
+  border-color: #162d6d !important;
 }

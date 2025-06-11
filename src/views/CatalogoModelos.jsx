@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Carousel } from 'react-bootstrap';
-import Tarjeta from '../Tarjeta'; // Asegúrate de que la ruta sea correcta
-import CuadroBusquedas from '../busquedas/CuadroBusquedas'; // Asegúrate de que la ruta sea correcta
-import Paginacion from '../ordenamiento/Paginacion'; // Asegúrate de que la ruta sea correcta
-import CarouselProductImage from '../carousel/CarouselProductoImagen'; // Asegúrate de que la ruta sea correcta
-import ModalAgregarModelo from '../Modelo/ModalRegistroModelo'; // Asegúrate de que la ruta sea correcta
-import './CatalogoModelo.css'; // Archivo CSS opcional para estilos
+import { Container, Row, Form, Carousel, Button } from 'react-bootstrap';
+import Tarjeta from '../components/Tarjeta'; // Asegúrate de que la ruta sea correcta
+import CarouselProductImage from '../components/carousel/CarouselProductoImagen'; // Asegúrate de que la ruta sea correcta
+import ModalAgregarModelo from '../components/Modelo/ModalRegistroModelo'; // Asegúrate de que la ruta sea correcta
+import '../CatalogoModelos.css'; // Archivo CSS opcional para estilos personalizados
 
-const CatalogoModelo = () => {
+const CatalogoModelos = () => {
   const [listaModelos, setListaModelos] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [modelosDestacados, setModelosDestacados] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
-  const [modelosFiltrados, setModelosFiltrados] = useState([]);
-  const [textoBusqueda, setTextoBusqueda] = useState('');
-  const [paginaActual, setPaginaActual] = useState(1);
-  const [modelosDestacados, setModelosDestacados] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevoModelo, setNuevoModelo] = useState({
     Nombre: '',
@@ -25,20 +21,17 @@ const CatalogoModelo = () => {
   });
   const [enviando, setEnviando] = useState(false);
   const [errorFormulario, setErrorFormulario] = useState(null);
-  const elementosPorPagina = 16;
 
   // Obtener modelos
   const obtenerModelos = async () => {
     try {
-      setCargando(true);
-      const respuesta = await fetch('http://localhost:3007/api/modelos');
+      const respuesta = await fetch('http://localhost:3000/api/modelos'); // Ajusta la URL según tu API
       if (!respuesta.ok) throw new Error('Error al cargar los modelos');
       const datos = await respuesta.json();
       console.log('Datos de modelos recibidos:', datos[0]); // Debug
       setListaModelos(datos);
-      setModelosFiltrados(datos);
 
-      // Seleccionar los primeros 3 modelos como destacados
+      // Simulamos modelos destacados (los primeros 3)
       const destacados = datos.slice(0, 3);
       console.log('Modelos destacados:', destacados[0]); // Debug
       setModelosDestacados(destacados);
@@ -55,22 +48,6 @@ const CatalogoModelo = () => {
     obtenerModelos();
   }, []);
 
-  // Manejar cambios en la búsqueda
-  const manejarCambioBusqueda = (e) => {
-    const texto = e.target.value.toLowerCase();
-    setTextoBusqueda(texto);
-    setPaginaActual(1);
-
-    const filtrados = listaModelos.filter(
-      (modelo) =>
-        modelo.Nombre.toLowerCase().includes(texto) ||
-        (modelo.Modelo && modelo.Modelo.toLowerCase().includes(texto)) ||
-        (modelo.Medida && modelo.Medida.toString().toLowerCase().includes(texto)) ||
-        (modelo.Color && modelo.Color.toLowerCase().includes(texto))
-    );
-    setModelosFiltrados(filtrados);
-  };
-
   // Manejar cambios en el formulario del modal
   const manejarCambioInput = (e) => {
     const { name, value } = e.target;
@@ -80,17 +57,14 @@ const CatalogoModelo = () => {
   // Agregar nuevo modelo
   const agregarModelo = async () => {
     // Validación básica
-    if (!nuevoModelo.Nombre || 
-      !nuevoModelo.Modelo || 
-      !nuevoModelo.Medida || 
-      !nuevoModelo.Color) {
+    if (!nuevoModelo.Nombre || !nuevoModelo.Modelo || !nuevoModelo.Medida || !nuevoModelo.Color) {
       setErrorFormulario('Todos los campos son obligatorios');
       return;
     }
 
     setEnviando(true);
     try {
-      const respuesta = await fetch('http://localhost:3007/api/modelos', {
+      const respuesta = await fetch('http://localhost:3000/api/modelos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoModelo)
@@ -98,12 +72,8 @@ const CatalogoModelo = () => {
       if (!respuesta.ok) throw new Error('Error al agregar el modelo');
       const modeloAgregado = await respuesta.json();
       setListaModelos((prev) => [...prev, modeloAgregado]);
-      setModelosFiltrados((prev) => [...prev, modeloAgregado]);
       setMostrarModal(false);
-      setNuevoModelo({ Nombre: '', Modelo: 
-        '', Medida: '',
-         Color: '', 
-         imagen: '' });
+      setNuevoModelo({ Nombre: '', Modelo: '', Medida: '', Color: '', imagen: '' });
       setErrorFormulario(null);
     } catch (error) {
       console.error('Error al agregar modelo:', error);
@@ -113,14 +83,13 @@ const CatalogoModelo = () => {
     }
   };
 
-  // Calcular modelos paginados
-  const modelosPaginados = modelosFiltrados.slice(
-    (paginaActual - 1) * elementosPorPagina,
-    paginaActual * elementosPorPagina
+  // Filtrar modelos basado en la búsqueda
+  const modelosFiltrados = listaModelos.filter((modelo) =>
+    modelo.Nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   // Determinar si se debe mostrar el carrusel
-  const mostrarCarrusel = textoBusqueda === '';
+  const mostrarCarrusel = busqueda === '';
 
   if (cargando) return <div className="text-center p-4">Cargando...</div>;
   if (errorCarga) return <div className="text-danger text-center p-4">Error: {errorCarga}</div>;
@@ -128,19 +97,20 @@ const CatalogoModelo = () => {
   return (
     <Container className="mt-5">
       <h4>Catálogo de Modelos de Ataúdes</h4>
-      <Row className="mb-4 align-items-center">
-        <Col lg={2} md={3} sm={4} xs={5}>
-          <Button variant="primary" onClick={() => setMostrarModal(true)}>
-            Agregar Modelo
-          </Button>
-        </Col>
-        <Col lg={6} md={8} sm={8} xs={7}>
-          <CuadroBusquedas
-            textoBusqueda={textoBusqueda}
-            manejarCambioBusqueda={manejarCambioBusqueda}
+      <div className="mb-4 d-flex justify-content-between align-items-center">
+        <Button variant="primary" onClick={() => setMostrarModal(true)}>
+          Agregar Nuevo Modelo
+        </Button>
+        <Form.Group className="w-50">
+          <Form.Control
+            type="text"
+            placeholder="Buscar por nombre del modelo..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            aria-label="Buscar modelos"
           />
-        </Col>
-      </Row>
+        </Form.Group>
+      </div>
 
       {/* Modal para agregar modelo */}
       <ModalAgregarModelo
@@ -179,8 +149,9 @@ const CatalogoModelo = () => {
         </div>
       )}
 
+      {/* Lista de modelos */}
       <Row>
-        {modelosPaginados.map((modelo, indice) => (
+        {modelosFiltrados.map((modelo, indice) => (
           <Tarjeta
             key={modelo.IDModelo}
             indice={indice}
@@ -193,15 +164,8 @@ const CatalogoModelo = () => {
           />
         ))}
       </Row>
-
-      <Paginacion
-        elementosPorPagina={elementosPorPagina}
-        totalElementos={modelosFiltrados.length}
-        paginaActual={paginaActual}
-        establecerPaginaActual={setPaginaActual}
-      />
     </Container>
   );
 };
 
-export default CatalogoModelo;
+export default CatalogoModelos;

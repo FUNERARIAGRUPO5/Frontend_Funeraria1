@@ -77,7 +77,7 @@ const Modelos = () => {
 
     try {
       setEnviando(true);
-      const respuesta = await fetch('http://localhost:3007/api/registrarmodelos', {
+      const respuesta = await fetch('http://localhost:3007/api/modelos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -159,7 +159,7 @@ const Modelos = () => {
     }
 
     try {
-      const respuesta = await fetch(`http://localhost:3007/api/actualizarmodelos/${modeloEditado.IDModelo}`, {
+      const respuesta = await fetch(`http://localhost:3007/api/actualizarModelo/${modeloEditado.IDModelo}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

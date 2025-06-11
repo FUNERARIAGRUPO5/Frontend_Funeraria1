@@ -7,28 +7,15 @@ import autoTable from 'jspdf-autotable';
 
 const Estadodecontrato = ({ estados, cantidadesPorEstado }) => {
   const chartRef = useRef(null);
+
   const data = {
     labels: estados,
     datasets: [
       {
-        label: 'Cantidad',
+        label: 'Contratos',
         data: cantidadesPorEstado,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-        ],
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
         borderWidth: 1,
       },
     ],
@@ -52,6 +39,7 @@ const Estadodecontrato = ({ estados, cantidadesPorEstado }) => {
           display: true,
           text: 'Cantidad',
         },
+        min: 0,
       },
       x: {
         title: {
@@ -65,14 +53,12 @@ const Estadodecontrato = ({ estados, cantidadesPorEstado }) => {
   const generarPDF = () => {
     const doc = new jsPDF();
 
-    // Encabezado
     doc.setFillColor(28, 41, 51);
     doc.rect(0, 0, doc.internal.pageSize.getWidth(), 30, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
     doc.text('Reporte de Estados de Contrato', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
 
-    // Capturar gráfico como imagen
     const chartInstance = chartRef.current;
     const chartCanvas = chartInstance?.canvas;
     const chartImage = chartCanvas?.toDataURL('image/png', 1.0);
@@ -81,9 +67,8 @@ const Estadodecontrato = ({ estados, cantidadesPorEstado }) => {
       doc.addImage(chartImage, 'PNG', 14, 40, 180, 100);
     }
 
-    // Tabla de datos
     const columnas = ['Estado', 'Cantidad'];
-    const filas = estados.map((estado, index) => [estado, cantidadesPorEstado[index] || 0]); // Validación para evitar undefined
+    const filas = estados.map((estado, index) => [estado, cantidadesPorEstado[index] || 0]);
 
     autoTable(doc, {
       head: [columnas],
@@ -94,14 +79,12 @@ const Estadodecontrato = ({ estados, cantidadesPorEstado }) => {
       margin: { top: 20, left: 14, right: 14 },
     });
 
-    // Generar un nombre dinámico para el archivo PDF
     const fecha = new Date();
     const dia = String(fecha.getDate()).padStart(2, '0');
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const anio = fecha.getFullYear();
-    const nombreArchivo = `EstadosDeContrato_.pdf`;
+    const nombreArchivo = `EstadosDeContrato_${dia}-${mes}-${anio}.pdf`;
 
-    // Guardar PDF
     doc.save(nombreArchivo);
   };
 
@@ -110,9 +93,13 @@ const Estadodecontrato = ({ estados, cantidadesPorEstado }) => {
       <Card.Body>
         <Card.Title>Estados de Contrato</Card.Title>
         <div style={{ height: '300px', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-          <Bar ref={chartRef} data={data} options={options} />
+          {estados.length > 0 ? (
+            <Bar ref={chartRef} data={data} options={options} />
+          ) : (
+            <p>No hay datos disponibles para mostrar el gráfico.</p>
+          )}
         </div>
-        <Button className="btn btn-primary mt-3" onClick={generarPDF}>
+        <Button className="btn btn-primary mt-3" onClick={generarPDF} disabled={estados.length === 0}>
           Generar Reporte <i className="bi bi-download"></i>
         </Button>
       </Card.Body>

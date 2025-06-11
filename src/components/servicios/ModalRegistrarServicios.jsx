@@ -9,20 +9,64 @@ const ModalAgregarServicio = ({
   agregarServicio,
   errorCarga,
 }) => {
+  // Validation for letters only (Nombre, Codigo_de_Modelo)
+  const validarLetras = (e) => {
+    const charCode = e.which || e.keyCode;
+    if (
+      !(charCode >= 65 && charCode <= 90) && // Uppercase letters
+      !(charCode >= 97 && charCode <= 122) && // Lowercase letters
+      charCode !== 8 && // Backspace
+      charCode !== 46 && // Delete
+      charCode !== 9 // Tab
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  // Validation for numbers only (monto, IDModelo, ID_Contrato)
+  const validarNumeros = (e) => {
+    const charCode = e.which || e.keyCode;
+    if (
+      !(charCode >= 48 && charCode <= 57) && // Numbers 0-9
+      charCode !== 8 && // Backspace
+      charCode !== 46 && // Delete
+      charCode !== 9 // Tab
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  // Form validation to enable/disable submit button
+  const validacionFormulario = () => {
+    return (
+      nuevoServicio.Nombre?.trim() !== "" &&
+      nuevoServicio.Codigo_de_Modelo?.trim() !== "" &&
+      nuevoServicio.monto?.toString().trim() !== "" &&
+      nuevoServicio.IDModelo?.toString().trim() !== "" &&
+      nuevoServicio.ID_Contrato?.toString().trim() !== ""
+    );
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    agregarServicio();
+  };
+
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Nuevo Servicio</Modal.Title>
+        <Modal.Title>Registro de un nuevo Servicio</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group className="mb-3" controlId="formAtNombre">
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3" controlId="formNombre">
             <Form.Label>Nombre del Servicio</Form.Label>
             <Form.Control
               type="text"
-              name="At_Nombre"
-              value={nuevoServicio.At_Nombre || ""}
+              name="Nombre"
+              value={nuevoServicio.Nombre || ""}
               onChange={manejarCambioInput}
+              onKeyDown={validarLetras}
               placeholder="Ingresa el nombre del servicio (máx. 20 caracteres)"
               maxLength={20}
               required
@@ -36,6 +80,7 @@ const ModalAgregarServicio = ({
               name="Codigo_de_Modelo"
               value={nuevoServicio.Codigo_de_Modelo || ""}
               onChange={manejarCambioInput}
+              onKeyDown={validarLetras}
               placeholder="Ingresa el código de modelo (máx. 20 caracteres)"
               maxLength={20}
               required
@@ -49,6 +94,7 @@ const ModalAgregarServicio = ({
               name="monto"
               value={nuevoServicio.monto || ""}
               onChange={manejarCambioInput}
+              onKeyDown={validarNumeros}
               placeholder="Ingresa el monto (mín. 0)"
               min={0}
               step="0.01"
@@ -60,9 +106,10 @@ const ModalAgregarServicio = ({
             <Form.Label>ID Modelo</Form.Label>
             <Form.Control
               type="number"
-              name="ID_Modelo"
-              value={nuevoServicio.ID_Modelo || ""}
+              name="IDModelo"
+              value={nuevoServicio.IDModelo || ""}
               onChange={manejarCambioInput}
+              onKeyDown={validarNumeros}
               placeholder="Ingresa el ID del modelo (mín. 1)"
               min={1}
               required
@@ -76,28 +123,12 @@ const ModalAgregarServicio = ({
               name="ID_Contrato"
               value={nuevoServicio.ID_Contrato || ""}
               onChange={manejarCambioInput}
+              onKeyDown={validarNumeros}
               placeholder="Ingresa el ID del contrato (mín. 1)"
               min={1}
               required
               aria-label="ID del contrato"
             />
-            <Form.Control
-            type="file"
-            name="imagen"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  manejarCambioInput({
-                    target: { name: 'imagen', value: reader.result.split(',')[1] } // Extrae solo la parte Base64
-                  });
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-          />
           </Form.Group>
           {errorCarga && (
             <div className="text-danger mt-2">{errorCarga}</div>
@@ -114,10 +145,12 @@ const ModalAgregarServicio = ({
         </Button>
         <Button
           variant="primary"
-          onClick={agregarServicio}
+          type="submit"
+          onClick={handleSubmit}
+          disabled={!validacionFormulario()}
           aria-label="Agregar nuevo servicio"
         >
-          Agregar Servicio
+          Guardar Servicio
         </Button>
       </Modal.Footer>
     </Modal>

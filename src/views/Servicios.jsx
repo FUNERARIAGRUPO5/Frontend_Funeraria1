@@ -67,14 +67,24 @@ const Servicios = () => {
       return;
     }
 
+    const payload = {
+      ...nuevoServicio,
+      monto: Number(nuevoServicio.monto),
+      IDModelo: Number(nuevoServicio.IDModelo),
+      ID_Contrato: Number(nuevoServicio.ID_Contrato)
+    };
+
     try {
       const respuesta = await fetch('http://localhost:3007/api/registrarservicio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevoServicio)
+        body: JSON.stringify(payload)
       });
 
-      if (!respuesta.ok) throw new Error('Error al agregar el servicio');
+      if (!respuesta.ok) {
+        const errorData = await respuesta.json().catch(() => ({ mensaje: 'No detailed error message' }));
+        throw new Error(errorData.mensaje || 'Error desconocido');
+      }
 
       await obtenerServicios();
       setNuevoServicio({ Nombre: '', Codigo_de_Modelo: '', monto: '', IDModelo: '', ID_Contrato: '' });
@@ -83,6 +93,7 @@ const Servicios = () => {
       setErrorCarga(null);
     } catch (error) {
       setErrorCarga(error.message);
+      console.error('Error detallado:', error);
     }
   };
 
@@ -114,6 +125,23 @@ const Servicios = () => {
       return;
     }
 
+    // Validación adicional para evitar NaN
+    const montoNum = Number(servicioEditado.monto);
+    const idModeloNum = Number(servicioEditado.IDModelo);
+    const idContratoNum = Number(servicioEditado.ID_Contrato);
+    if (isNaN(montoNum) || isNaN(idModeloNum) || isNaN(idContratoNum)) {
+      setErrorCarga("Los valores numéricos no son válidos.");
+      return;
+    }
+
+    console.log('Datos enviados a actualizar:', {
+      Nombre: servicioEditado.Nombre,
+      Codigo_de_Modelo: servicioEditado.Codigo_de_Modelo,
+      monto: montoNum,
+      IDModelo: idModeloNum,
+      ID_Contrato: idContratoNum
+    });
+
     try {
       const respuesta = await fetch(`http://localhost:3007/api/actualizarservicio/${id}`, {
         method: 'PATCH',
@@ -121,9 +149,9 @@ const Servicios = () => {
         body: JSON.stringify({
           Nombre: servicioEditado.Nombre,
           Codigo_de_Modelo: servicioEditado.Codigo_de_Modelo,
-          monto: servicioEditado.monto,
-          IDModelo: servicioEditado.IDModelo,
-          ID_Contrato: servicioEditado.ID_Contrato
+          monto: montoNum,
+          IDModelo: idModeloNum,
+          ID_Contrato: idContratoNum
         }),
       });
 
@@ -131,7 +159,8 @@ const Servicios = () => {
         if (respuesta.status === 404) {
           throw new Error(`Servicio con ID ${id} no encontrado o ruta de actualización no disponible`);
         }
-        throw new Error(`Error al actualizar el servicio: ${respuesta.statusText}`);
+        const errorData = await respuesta.json().catch(() => ({ mensaje: 'No detailed error message' }));
+        throw new Error(errorData.mensaje || `Error al actualizar el servicio: ${respuesta.statusText}`);
       }
 
       await obtenerServicios();

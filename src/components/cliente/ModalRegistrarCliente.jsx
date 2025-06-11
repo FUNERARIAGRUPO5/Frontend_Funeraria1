@@ -9,6 +9,44 @@ const ModalRegistroCliente = ({
   agregarCliente,
   errorCarga,
 }) => {
+  // Validation for letters only (Nombre and Apellido)
+  const validarLetras = (e) => {
+    const charCode = e.which || e.keyCode;
+    if (
+      !(charCode >= 65 && charCode <= 90) && // Uppercase letters
+      !(charCode >= 97 && charCode <= 122) && // Lowercase letters
+      charCode !== 8 && // Backspace
+      charCode !== 46 && // Delete
+      charCode !== 9 // Tab
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  // Validation for numbers only (Telefono and Cedula)
+  const validarNumeros = (e) => {
+    const charCode = e.which || e.keyCode;
+    if (
+      !(charCode >= 48 && charCode <= 57) && // Numbers 0-9
+      charCode !== 8 && // Backspace
+      charCode !== 46 && // Delete
+      charCode !== 9 // Tab
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  // Form validation to enable/disable submit button
+  const validacionFormulario = () => {
+    return (
+      nuevoCliente.Nombre.trim() !== "" &&
+      nuevoCliente.Apellido.trim() !== "" &&
+      nuevoCliente.Direccion.trim() !== "" &&
+      nuevoCliente.Cedula.trim() !== "" &&
+      nuevoCliente.Telefono.trim() !== ""
+    );
+  };
+
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
       <Modal.Header closeButton>
@@ -23,93 +61,81 @@ const ModalRegistroCliente = ({
               name="Nombre"
               value={nuevoCliente.Nombre}
               onChange={manejarCambioInput}
+              onKeyDown={validarLetras}
               placeholder="Ingresa el nombre (máx. 20 caracteres)"
               maxLength={20}
               required
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3" controlId="formApellido">
             <Form.Label>Apellido</Form.Label>
             <Form.Control
-              as="textarea"
-              rows={3}
+              type="text"
               name="Apellido"
               value={nuevoCliente.Apellido}
               onChange={manejarCambioInput}
+              onKeyDown={validarLetras}
               placeholder="Ingresa el Apellido (máx. 20 caracteres)"
-              maxLength={100}
+              maxLength={20}
+              required
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3" controlId="formDireccion">
-            <Form.Label>Direccion del Cliente</Form.Label>
+            <Form.Label>Dirección del Cliente</Form.Label>
             <Form.Control
               type="text"
               name="Direccion"
               value={nuevoCliente.Direccion}
               onChange={manejarCambioInput}
-              placeholder="Ingresa la Direccion (máx. 20 caracteres)"
-              maxLength={20}
+              placeholder="Ingresa la Dirección (máx. 150 caracteres)"
+              maxLength={150}
               required
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="formCedula">
-            <Form.Label>Cedula del Cliente</Form.Label>
+            <Form.Label>Cédula del Cliente</Form.Label>
             <Form.Control
               type="text"
               name="Cedula"
               value={nuevoCliente.Cedula}
               onChange={manejarCambioInput}
-              placeholder="Ingresa la Cedula (máx. 20 caracteres)"
-              maxLength={20}
+              placeholder="Ingresa la Cédula (máx. 14 caracteres)"
+              maxLength={14}
               required
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="formTelefono">
-            <Form.Label>Telefono del Cliente</Form.Label>
+            <Form.Label>Teléfono del Cliente</Form.Label>
             <Form.Control
               type="text"
               name="Telefono"
               value={nuevoCliente.Telefono}
               onChange={manejarCambioInput}
-              placeholder="Ingresa el Telefono (máx. 20 caracteres)"
-              maxLength={20}
+              onKeyDown={validarNumeros}
+              placeholder="Ingresa el Teléfono (8 dígitos)"
+              maxLength={8}
               required
             />
           </Form.Group>
-            <Form.Control
-    type="file"
-    name="imagen"
-    accept="image/*"
-    onChange={(e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          manejarCambioInput({
-            target: { name: 'imagen', value: reader.result.split(',')[1] } // Extrae solo la parte Base64
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    }}
-  />
+
           {errorCarga && (
             <div className="text-danger mt-2">{errorCarga}</div>
           )}
         </Form>
-
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => {
-          setMostrarModal(false);
-        }}>
+        <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={agregarCliente}>
+        <Button
+          variant="primary"
+          onClick={agregarCliente}
+          disabled={!validacionFormulario()}
+        >
           Guardar Cliente
         </Button>
       </Modal.Footer>

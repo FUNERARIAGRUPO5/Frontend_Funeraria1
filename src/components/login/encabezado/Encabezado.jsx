@@ -37,7 +37,7 @@ const Encabezado = () => {
           <img
             alt="Funeraria Heraldica"
             src={logo}
-            style={{ height: "50px", width: "auto", marginRight: "10px" }}
+            style={{ height: "40px", width: "auto", marginRight: "10px" }}
             className="d-inline-block align-top"
           />
           <strong>Funeraria Heraldica</strong>

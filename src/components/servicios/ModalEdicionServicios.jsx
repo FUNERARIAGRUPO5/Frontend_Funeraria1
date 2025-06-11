@@ -23,7 +23,7 @@ const ModalEdicionServicio = ({
               name="Nombre"
               value={servicioEditado?.Nombre || ""}
               onChange={manejarCambioInputEdicion}
-              placeholder="Ingresa el nombre del servicio (máx. 20 caracteres)"
+              placeholder="Ingresa el nombre (máx. 20 caracteres)"
               maxLength={20}
               required
             />
@@ -41,7 +41,7 @@ const ModalEdicionServicio = ({
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formMonto">
-            <Form.Label>Monto</Form.Label>
+            <Form.Label>Monto del Servicio</Form.Label>
             <Form.Control
               type="number"
               name="monto"
@@ -49,11 +49,12 @@ const ModalEdicionServicio = ({
               onChange={manejarCambioInputEdicion}
               placeholder="Ingresa el monto"
               min="0"
+              step="0.01"
               required
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formIDModelo">
-            <Form.Label>ID Modelo</Form.Label>
+            <Form.Label>ID Modelo del Servicio</Form.Label>
             <Form.Control
               type="number"
               name="IDModelo"
@@ -65,7 +66,7 @@ const ModalEdicionServicio = ({
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formIDContrato">
-            <Form.Label>ID Contrato</Form.Label>
+            <Form.Label>ID Contrato del Servicio</Form.Label>
             <Form.Control
               type="number"
               name="ID_Contrato"

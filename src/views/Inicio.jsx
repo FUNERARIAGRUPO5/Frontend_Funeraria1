@@ -30,7 +30,6 @@ return (
     <h1 className="text-center m-4">¡Bienvenido, {nombreUsuario}!</h1>
     <Image style={{ width: "90%" }} src={logo} fluid rounded />
     <Proposito />
-    <button className="btn btn-danger" onClick={cerrarSesion}>Cerrar Sesión</button>
   </Container>
 );
 };

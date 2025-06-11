@@ -29,16 +29,16 @@ const ModalRegistroContrato = ({
             />
           </Form.Group>
           
-          <Form.Group className="mb-3" controlId="formCantidad_Beneficiarios">
+          <Form.Group className="mb-3" controlId="formCantidadBeneficiarios">
             <Form.Label>Cantidad de beneficiarios</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
-              name="Cantidad_Beneficiarios"
-              value={nuevoContrato.Cantidad_Beneficiarios}
+              name="CantidadBeneficiarios" // Corrección aquí
+              value={nuevoContrato.CantidadBeneficiarios} // Corrección aquí
               onChange={manejarCambioInput}
               placeholder="Ingresa la cantidad de beneficiarios (máx. 20 caracteres)"
-              maxLength={100}
+              maxLength={20}
             />
           </Form.Group>
           
@@ -49,7 +49,7 @@ const ModalRegistroContrato = ({
               name="Cuotas"
               value={nuevoContrato.Cuotas}
               onChange={manejarCambioInput}
-              placeholder="Ingresa las cuatoas del contrato (máx. 20 caracteres)"
+              placeholder="Ingresa las cuotas del contrato (máx. 20 caracteres)"
               maxLength={20}
               required
             />
@@ -58,11 +58,11 @@ const ModalRegistroContrato = ({
           <Form.Group className="mb-3" controlId="formMonto">
             <Form.Label>Monto del contrato</Form.Label>
             <Form.Control
-              type="text"
+              type="number"
               name="Monto"
               value={nuevoContrato.Monto}
               onChange={manejarCambioInput}
-              placeholder="Ingresa el Monto (máx. 20 caracteres)"
+              placeholder="Ingresa el monto (máx. 20 caracteres)"
               maxLength={20}
               required
             />
@@ -71,25 +71,21 @@ const ModalRegistroContrato = ({
           <Form.Group className="mb-3" controlId="formFecha_inicio">
             <Form.Label>Fecha de inicio</Form.Label>
             <Form.Control
-              type="text"
+              type="date"
               name="Fecha_inicio"
               value={nuevoContrato.Fecha_inicio}
               onChange={manejarCambioInput}
-              placeholder="Ingresa la fecha de creacion del contrato (máx. 20 caracteres)"
-              maxLength={20}
               required
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="formFecha_fin">
-            <Form.Label>Fecha del fin</Form.Label>
+            <Form.Label>Fecha de fin</Form.Label>
             <Form.Control
-              type="text"
+              type="date"
               name="Fecha_fin"
               value={nuevoContrato.Fecha_fin}
               onChange={manejarCambioInput}
-              placeholder="Ingresa la fecha de finalisacion del contrato (máx. 20 caracteres)"
-              maxLength={20}
               required
             />
           </Form.Group>
@@ -98,30 +94,13 @@ const ModalRegistroContrato = ({
             <Form.Label>ID del cliente</Form.Label>
             <Form.Control
               type="text"
-              name="IDcliente"
-              value={nuevoContrato.IDcliente}
+              name="IDCliente" // Corrección aquí
+              value={nuevoContrato.IDCliente} // Corrección aquí
               onChange={manejarCambioInput}
               placeholder="Ingresa el ID del cliente (máx. 20 caracteres)"
               maxLength={20}
               required
             />
-            <Form.Control
-            type="file"
-            name="imagen"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  manejarCambioInput({
-                    target: { name: 'imagen', value: reader.result.split(',')[1] } // Extrae solo la parte Base64
-                  });
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-          />
           </Form.Group>
 
           {errorCarga && (
@@ -130,9 +109,7 @@ const ModalRegistroContrato = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => {
-          setMostrarModal(false);
-        }}>
+        <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
         <Button variant="primary" onClick={agregarContrato}>
